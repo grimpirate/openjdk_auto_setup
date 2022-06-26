@@ -9,7 +9,7 @@ Run script and get urls to JDK archive(s) from:
 ```
 PS > & .\openjdk_auto_setup.ps1
 ```
-Resultant user environment variable(s) created/affected:
+User environment variable(s) created/affected:
 ```
 JAVA_HOME   %UserProfile%\Downloads\programs\jdk-*\
 PATH_TO_FX  %UserProfile%\Downloads\programs\javafx-*\lib\
