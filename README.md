@@ -1,0 +1,1 @@
+# openjdk_auto_setup
