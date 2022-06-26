@@ -9,10 +9,10 @@
 #>
 
 param(
-	[Parameter(Mandatory)]
-	[String]$openjdk_url,
-	[Parameter(Mandatory)]
-	[String]$openjfx_url
+	[Parameter()]
+	[String]$jdk_archive,
+	[Parameter()]
+	[String]$jfx_archive
 )
 
 function Get-Java
@@ -43,8 +43,31 @@ function Get-Java
 	return $java_dir
 }
 
-$jdk_dir = Get-Java $openjdk_url "JAVA_HOME" "jdk-*"
-$jfx_dir = Get-Java $openjfx_url "PATH_TO_FX" "javafx-*" "lib"
+if([string]::IsNullOrWhiteSpace($jdk_archive))
+{
+	$jdk_archive = "https://jdk.java.net"
+	$jdk_archive = (Invoke-WebRequest -Uri $jdk_archive -UseBasicParsing).Links.Href[0]
+	$jdk_archive = "https://jdk.java.net$jdk_archive"
+	$jdk_archive = ((Invoke-WebRequest -Uri $jdk_archive -UseBasicParsing).Links | Where-Object {$_.Href -like "*zip"}).Href	
+}
+
+if([string]::IsNullOrWhiteSpace($jfx_archive))
+{
+	$jfx_archive = "https://gluonhq.com/products/javafx"
+	$jfx_archive = (Invoke-WebRequest -Uri $jfx_archive -UseBasicParsing).RawContent -match "[^']*custom-css-js[^']*"
+	$jfx_archive = $Matches[0]
+	$jfx_archive = "https:$jfx_archive"
+	$jfx_archive = (Invoke-WebRequest -Uri $jfx_archive -UseBasicParsing).RawContent -match "REGULAR_.*"
+	$jfx_archive = $Matches[0]
+
+	$version = $jfx_archive -match "(\d+),\s+(\d+),\s+(\d+),"
+	$version = $Matches[1] + "." + $Matches[2] + "." + $Matches[3]
+
+	$jfx_archive = "https://download2.gluonhq.com/openjfx/$version/openjfx-" + $version + "_windows-x64_bin-sdk.zip"
+}
+
+$jdk_dir = Get-Java $jdk_archive "JAVA_HOME" "jdk-*"
+$jfx_dir = Get-Java $jfx_archive "PATH_TO_FX" "javafx-*" "lib"
 
 <# USER PATH ENVIRONMENT VARIABLE #>
 $p = [Environment]::GetEnvironmentVariable("PATH", [EnvironmentVariableTarget]::User)
