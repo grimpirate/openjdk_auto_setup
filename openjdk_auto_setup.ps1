@@ -60,10 +60,12 @@ if([string]::IsNullOrWhiteSpace($jfx_archive))
 	$jfx_archive = (Invoke-WebRequest -Uri $jfx_archive -UseBasicParsing).RawContent -match "REGULAR_.*"
 	$jfx_archive = $Matches[0]
 
-	$version = $jfx_archive -match "(\d+),\s+(\d+),\s+(\d+),"
-	$version = $Matches[1] + "." + $Matches[2] + "." + $Matches[3]
+	$ver = $jfx_archive -match "(\d+),\s+(\d+),\s+(\d+),"
+	$ver = $Matches[1] + "." + $Matches[2] + "." + $Matches[3]
 
-	$jfx_archive = "https://download2.gluonhq.com/openjfx/$version/openjfx-" + $version + "_windows-x64_bin-sdk.zip"
+	$arch = if([Environment]::Is64BitOperatingSystem) {"x64"} else {"x86"}
+
+	$jfx_archive = "https://download2.gluonhq.com/openjfx/$ver/openjfx-" + $ver + "_windows-" + $arch + "_bin-sdk.zip"
 }
 
 $jdk_dir = Get-Java $jdk_archive "JAVA_HOME" "jdk-*"
