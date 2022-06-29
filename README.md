@@ -13,5 +13,5 @@ User environment variable(s) created/affected:
 ```
 JAVA_HOME   %UserProfile%\Downloads\programs\jdk-*\
 PATH_TO_FX  %UserProfile%\Downloads\programs\javafx-*\lib\
-PATH        ...;%UserProfile%\Downloads\programs\jdk-*\bin\
+PATH        ...;%JAVA_HOME%\bin\;
 ```
