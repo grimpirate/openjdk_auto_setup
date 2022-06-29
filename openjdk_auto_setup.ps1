@@ -10,16 +10,16 @@
 
 param(
 	[Parameter()]
-	[String]$jdk_archive,
+	[String]$jdkArchive,
 	[Parameter()]
-	[String]$jfx_archive
+	[String]$jfxArchive
 )
 
 function Get-Java
 {
 	param(
 		$url,
-		$env_var,
+		$envVar,
 		$filter,
 		$sub
 	)
@@ -32,47 +32,50 @@ function Get-Java
 	Remove-Item $archive
 
 	<# JAVA HOME #>
-	$java_dir = Get-ChildItem -directory "$env:USERPROFILE\Downloads\programs\" -Filter $filter
-	$java_dir = "$env:USERPROFILE\Downloads\programs\$java_dir"
+	$javaDir = Get-ChildItem -directory "$env:USERPROFILE\Downloads\programs\" -Filter $filter
+	$javaDir = "$env:USERPROFILE\Downloads\programs\$javaDir"
 	if(-not([string]::IsNullOrWhiteSpace($sub)))
 	{
-		$java_dir = "$java_dir\$sub"
+		$javaDir = "$javaDir\$sub"
 	}
-	[Environment]::SetEnvironmentVariable($env_var, $java_dir, [EnvironmentVariableTarget]::User)
+	[Environment]::SetEnvironmentVariable($envVar, $javaDir, [EnvironmentVariableTarget]::User)
 
-	return $java_dir
+	return $javaDir
 }
 
-if([string]::IsNullOrWhiteSpace($jdk_archive))
+if([string]::IsNullOrWhiteSpace($jdkArchive))
 {
-	$jdk_archive = "https://jdk.java.net"
-	$jdk_archive = (Invoke-WebRequest -Uri $jdk_archive -UseBasicParsing).Links.Href[0]
-	$jdk_archive = "https://jdk.java.net$jdk_archive"
-	$jdk_archive = ((Invoke-WebRequest -Uri $jdk_archive -UseBasicParsing).Links | Where-Object {$_.Href -like "*zip"}).Href	
+	$jdkArchive = "https://jdk.java.net"
+	$jdkArchive = (Invoke-WebRequest -Uri $jdkArchive -UseBasicParsing).Links.Href[0]
+	$jdkArchive = "https://jdk.java.net$jdkArchive"
+	$jdkArchive = ((Invoke-WebRequest -Uri $jdkArchive -UseBasicParsing).Links | Where-Object {$_.Href -like "*zip"}).Href	
 }
 
-if([string]::IsNullOrWhiteSpace($jfx_archive))
+if([string]::IsNullOrWhiteSpace($jfxArchive))
 {
-	$jfx_archive = "https://gluonhq.com/products/javafx"
-	$jfx_archive = (Invoke-WebRequest -Uri $jfx_archive -UseBasicParsing).RawContent -match "[^']*custom-css-js[^']*"
-	$jfx_archive = $Matches[0]
-	$jfx_archive = "https:$jfx_archive"
-	$jfx_archive = (Invoke-WebRequest -Uri $jfx_archive -UseBasicParsing).RawContent -match "REGULAR_.*"
-	$jfx_archive = $Matches[0]
+	$jfxArchive = "https://gluonhq.com/products/javafx"
+	$jfxArchive = (Invoke-WebRequest -Uri $jfxArchive -UseBasicParsing).RawContent -match "[^']*custom-css-js[^']*"
+	$jfxArchive = $Matches[0]
+	$jfxArchive = "https:$jfxArchive"
+	$jfxArchive = (Invoke-WebRequest -Uri $jfxArchive -UseBasicParsing).RawContent -match "REGULAR_.*"
+	$jfxArchive = $Matches[0]
 
-	$ver = $jfx_archive -match "(\d+),\s+(\d+),\s+(\d+),"
+	$ver = $jfxArchive -match "(\d+),\s+(\d+),\s+(\d+),"
 	$ver = $Matches[1] + "." + $Matches[2] + "." + $Matches[3]
 
 	$arch = if([Environment]::Is64BitOperatingSystem) {"x64"} else {"x86"}
 
-	$jfx_archive = "https://download2.gluonhq.com/openjfx/$ver/openjfx-" + $ver + "_windows-" + $arch + "_bin-sdk.zip"
+	$jfxArchive = "https://download2.gluonhq.com/openjfx/$ver/openjfx-" + $ver + "_windows-" + $arch + "_bin-sdk.zip"
 }
 
-$jdk_dir = Get-Java $jdk_archive "JAVA_HOME" "jdk-*"
-$jfx_dir = Get-Java $jfx_archive "PATH_TO_FX" "javafx-*" "lib"
+$jdk_dir = Get-Java $jdkArchive "JAVA_HOME" "jdk-*"
+$jfx_dir = Get-Java $jfxArchive "PATH_TO_FX" "javafx-*" "lib"
 
 <# USER PATH ENVIRONMENT VARIABLE #>
 $p = [Environment]::GetEnvironmentVariable("PATH", [EnvironmentVariableTarget]::User)
 $p = $p.Split(";", [System.StringSplitOptions]::RemoveEmptyEntries)
 $p += "%JAVA_HOME%\bin"
-[Environment]::SetEnvironmentVariable("PATH", ($p -join ';'), [EnvironmentVariableTarget]::User)
+$p = ($p -join ";") + ";"
+<# [Environment]::SetEnvironmentVariable("PATH", $p, [EnvironmentVariableTarget]::User) #>
+<# Set-ItemProperty HKCU:\Environment -Name "PATH" -Value $p -Type ExpandString #>
+setx PATH "$p"
