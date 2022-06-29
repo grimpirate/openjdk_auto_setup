@@ -73,4 +73,4 @@ $jfx_dir = Get-Java $jfx_archive "PATH_TO_FX" "javafx-*" "lib"
 
 <# USER PATH ENVIRONMENT VARIABLE #>
 $p = [Environment]::GetEnvironmentVariable("PATH", [EnvironmentVariableTarget]::User)
-[Environment]::SetEnvironmentVariable("PATH", $p + ";$jdk_dir\bin", [EnvironmentVariableTarget]::User)
+[Environment]::SetEnvironmentVariable("PATH", $p + ";%JAVA_HOME%\bin", [EnvironmentVariableTarget]::User)
