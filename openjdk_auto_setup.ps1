@@ -6,6 +6,7 @@
 	https://www.baeldung.com/java-home-on-windows-7-8-10-mac-os-x-linux
 	https://jdk.java.net
 	https://gluonhq.com/products/javafx/
+	http://eddiejackson.net/lab/2020/05/20/powershell-log-off-and-shutdown/
 #>
 
 param(
@@ -26,12 +27,12 @@ function Get-Java
 
 	$archive = "$env:USERPROFILE\Downloads\programs\" + ([uri]$url).Segments[-1]
 
-	<# Download, extract, remove #>
+	# Download, extract, remove
 	Invoke-WebRequest -Uri $url -UseBasicParsing -OutFile $archive
 	Expand-Archive -LiteralPath $archive -DestinationPath "$env:USERPROFILE\Downloads\programs\"
 	Remove-Item $archive
 
-	<# JAVA HOME #>
+	# JAVA_HOME, PATH_TO_FX
 	$javaDir = Get-ChildItem -directory "$env:USERPROFILE\Downloads\programs\" -Filter $filter
 	$javaDir = "$env:USERPROFILE\Downloads\programs\$javaDir"
 	if(-not([string]::IsNullOrWhiteSpace($sub)))
@@ -68,14 +69,23 @@ if([string]::IsNullOrWhiteSpace($jfxArchive))
 	$jfxArchive = "https://download2.gluonhq.com/openjfx/$ver/openjfx-" + $ver + "_windows-" + $arch + "_bin-sdk.zip"
 }
 
-$jdk_dir = Get-Java $jdkArchive "JAVA_HOME" "jdk-*"
-$jfx_dir = Get-Java $jfxArchive "PATH_TO_FX" "javafx-*" "lib"
+$jdkDir = Get-Java $jdkArchive "JAVA_HOME" "jdk-*"
+$jfxDir = Get-Java $jfxArchive "PATH_TO_FX" "javafx-*" "lib"
 
-<# USER PATH ENVIRONMENT VARIABLE #>
+# USER PATH ENVIRONMENT VARIABLE
 $p = [Environment]::GetEnvironmentVariable("PATH", [EnvironmentVariableTarget]::User)
 $p = $p.Split(";", [System.StringSplitOptions]::RemoveEmptyEntries)
 $p += "%JAVA_HOME%\bin"
 $p = ($p -join ";") + ";"
-<# [Environment]::SetEnvironmentVariable("PATH", $p, [EnvironmentVariableTarget]::User) #>
-<# Set-ItemProperty HKCU:\Environment -Name "PATH" -Value $p -Type ExpandString #>
-setx PATH "$p"
+# [Environment]::SetEnvironmentVariable("PATH", $p, [EnvironmentVariableTarget]::User)
+# setx PATH "$p"
+Set-ItemProperty HKCU:\Environment -Name "PATH" -Value "$p" -Type ExpandString
+
+Write-Host "Must sign out to refresh: " -ForegroundColor yellow -NoNewLine
+Write-Host "%JAVA_HOME%\bin" -ForegroundColor magenta
+Write-Host "SAVE WORK AND CLOSE ALL APPLICATIONS!" -ForegroundColor red
+Write-Host "Sign out? [y/n]" -ForegroundColor yellow
+if((Read-Host) -match "[yY]")
+{
+	(Get-WmiObject -Class Win32_OperatingSystem).Win32Shutdown(0)
+}
