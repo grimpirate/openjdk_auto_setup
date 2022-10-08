@@ -2,6 +2,7 @@
 ## Requirements
 * Windows OS
 * PS > Set-ExecutionPolicy RemoteSigned
+* PS > Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 ## Usage
 Run script and get urls to JDK archive(s) from:
 * https://jdk.java.net
