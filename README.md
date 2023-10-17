@@ -1,7 +1,7 @@
 # OpenJDK PowerShell Setup Script
 ## Requirements
 * Windows OS
-* PS > Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -File .\openjdk_auto_setup.ps1
+* PS > Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 ## Usage
 Run script and get urls to JDK archive(s) from:
 * https://jdk.java.net
