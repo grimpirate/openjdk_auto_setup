@@ -58,11 +58,11 @@ if([string]::IsNullOrWhiteSpace($jfxArchive))
 	$jfxArchive = (Invoke-WebRequest -Uri $jfxArchive -UseBasicParsing).RawContent -match "[^']*custom-css-js[^']*"
 	$jfxArchive = $Matches[0]
 	$jfxArchive = "https:$jfxArchive"
-	$jfxArchive = (Invoke-WebRequest -Uri $jfxArchive -UseBasicParsing).RawContent -match "REGULAR_.*"
+	$jfxArchive = (Invoke-WebRequest -Uri $jfxArchive -UseBasicParsing).RawContent -match "var\s+versions.*"
 	$jfxArchive = $Matches[0]
 
-	$ver = $jfxArchive -match "(\d+),\s+(\d+),\s+(\d+),"
-	$ver = $Matches[1] + "." + $Matches[2] + "." + $Matches[3]
+	$ver = $jfxArchive -match "(\d+)"
+	$ver = $Matches[1]
 
 	$arch = if([Environment]::Is64BitOperatingSystem) {"x64"} else {"x86"}
 
